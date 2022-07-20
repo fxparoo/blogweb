@@ -1,3 +1,47 @@
-from django.shortcuts import render
+from rest_framework import viewsets, status
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from blogapp.models import BlogPost
+from blogapp.serializers import BlogPostSerializer
+from django.shortcuts import get_object_or_404
 
-# Create your views here.
+
+class BlogPostViewSet(viewsets.ViewSet):
+    serializer_class = BlogPostSerializer
+
+    def list(self, request):
+        queryset = BlogPost.objects.all()
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(queryset, request)
+        if page is not None:
+            serializer = BlogPostSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        else:
+            serializer = BlogPostSerializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        serializer = BlogPostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None, *args, **kwargs):
+        queryset = BlogPost.objects.all()
+        blogpost = get_object_or_404(queryset, pk=pk)
+        serializer = BlogPostSerializer(blogpost)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None, *args, **kwargs):
+        blogpost = BlogPost.objects.get(pk=pk)
+        serializer = BlogPostSerializer(blogpost, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=id, *args, **kwargs):
+        blogpost = BlogPost.objects.get(pk=pk)
+        blogpost.delete()
+        return Response({"detail": "blogpost deleted Succesfully."}, status=status.HTTP_204_NO_CONTENT)
