@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 
 class BlogPostViewSet(viewsets.ViewSet):
     serializer_class = BlogPostSerializer
+    queryset = BlogPost.objects.all()
 
     def list(self, request):
         queryset = BlogPost.objects.all()
@@ -28,7 +29,6 @@ class BlogPostViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
-
         blogpost = get_object_or_404(BlogPost, pk=pk)
         serializer = BlogPostSerializer(blogpost)
         return Response(serializer.data)
@@ -47,3 +47,6 @@ class BlogPostViewSet(viewsets.ViewSet):
         blog = get_object_or_404(BlogPost, pk=pk)
         blog.delete()
         return Response({"detail": "Photo deleted Succesfully."}, status=status.HTTP_204_NO_CONTENT)
+
+
+
