@@ -8,7 +8,6 @@ from django.shortcuts import get_object_or_404
 
 class BlogPostViewSet(viewsets.ViewSet):
     serializer_class = BlogPostSerializer
-    queryset = BlogPost.objects.all()
 
     def list(self, request):
         queryset = BlogPost.objects.all()
@@ -34,19 +33,13 @@ class BlogPostViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def update(self, request, pk=None, *args, **kwargs):
-        try:
-            blogpost = BlogPost.objects.get(pk=pk)
-            serializer = BlogPostSerializer(blogpost, data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-        except BlogPost.DoesNotExist:
-            return Response({"detail": "Blogpost not found."}, status=status.HTTP_404_NOT_FOUND)
+        blogpost = get_object_or_404(BlogPost, pk=pk)
+        serializer = BlogPostSerializer(blogpost, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     def delete(self, request, pk):
         blog = get_object_or_404(BlogPost, pk=pk)
         blog.delete()
-        return Response({"detail": "Photo deleted Succesfully."}, status=status.HTTP_204_NO_CONTENT)
-
-
-
+        return Response({"detail": "blog deleted Succesfully."}, status=status.HTTP_200_OK)
