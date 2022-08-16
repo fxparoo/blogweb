@@ -28,20 +28,18 @@ class BlogPostViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
-        queryset = BlogPost.objects.all()
-        blogpost = get_object_or_404(queryset, pk=pk)
+        blogpost = get_object_or_404(BlogPost, pk=pk)
         serializer = BlogPostSerializer(blogpost)
         return Response(serializer.data)
 
     def update(self, request, pk=None, *args, **kwargs):
-        blogpost = BlogPost.objects.get(pk=pk)
+        blogpost = get_object_or_404(BlogPost, pk=pk)
         serializer = BlogPostSerializer(blogpost, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
-    def delete(self, request, pk=id, *args, **kwargs):
-        blogpost = BlogPost.objects.get(pk=pk)
-        blogpost.delete()
-        return Response({"detail": "blogpost deleted Succesfully."}, status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, pk):
+        blog = get_object_or_404(BlogPost, pk=pk)
+        blog.delete()
+        return Response({"detail": "blog deleted Succesfully."}, status=status.HTTP_200_OK)
